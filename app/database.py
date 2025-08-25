@@ -20,3 +20,10 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+def create_tables():
+    """Create all tables in the database"""
+    # Import models to ensure they are registered with Base
+    from app.models import Session, UploadedFile, ValidationResult
+    Base.metadata.create_all(bind=engine)

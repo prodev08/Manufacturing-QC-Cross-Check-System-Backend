@@ -35,14 +35,26 @@ cp .env.example .env
 # DATABASE_URL=postgresql://user:password@localhost:5432/qc_system
 ```
 
-5. Run the development server:
+5. Initialize the database:
 ```bash
-cd Backend
+python init_db.py
+```
+
+6. Run the development server:
+```bash
 python -m uvicorn app.main:app --reload
 ```
 
 The API will be available at: http://localhost:8000
 API Documentation: http://localhost:8000/docs
+
+## Database Migrations
+
+To create a new migration after model changes:
+```bash
+alembic revision --autogenerate -m "Description of changes"
+alembic upgrade head
+```
 
 ## Project Structure
 
@@ -62,9 +74,11 @@ app/
 ## Current Status
 
 - ✅ Basic FastAPI structure
-- ✅ Configuration management
-- ✅ Database setup (SQLAlchemy)
-- ⏳ Database models (next step)
-- ⏳ File upload endpoints
+- ✅ Configuration management  
+- ✅ Database setup (SQLAlchemy + PostgreSQL)
+- ✅ Database models (Session, UploadedFile, ValidationResult)
+- ✅ Pydantic schemas for API requests/responses
+- ✅ Alembic database migrations
+- ⏳ File upload endpoints (next step)
 - ⏳ File processing pipeline
 - ⏳ Validation engine
