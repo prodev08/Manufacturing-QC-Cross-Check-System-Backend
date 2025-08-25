@@ -104,6 +104,19 @@ app/
 - `GET /api/v1/processing/status/{session_id}` - Get processing status and summary
 - `POST /api/v1/processing/process-file/{file_id}` - Process a single file
 
+### Validation
+- `POST /api/v1/validation/validate/{session_id}` - Start validation (background)
+- `POST /api/v1/validation/validate-now/{session_id}` - Run validation immediately
+- `GET /api/v1/validation/results/{session_id}` - Get validation results
+- `GET /api/v1/validation/summary/{session_id}` - Get validation summary
+- `DELETE /api/v1/validation/results/{session_id}` - Clear validation results
+
+### Workflow (Complete Analysis)
+- `POST /api/v1/workflow/analyze/{session_id}` - Run complete analysis (process + validate)
+- `POST /api/v1/workflow/analyze-now/{session_id}` - Run complete analysis immediately
+- `GET /api/v1/workflow/status/{session_id}` - Get comprehensive workflow status
+- `POST /api/v1/workflow/retry/{session_id}` - Retry failed processing
+
 ### Supported File Types
 - **Traveler PDFs**: `application/pdf`
 - **Product Images**: `image/jpeg`, `image/png`
@@ -130,5 +143,7 @@ python test_api.py
 - ✅ File processing pipeline (PDF, OCR, Excel)
 - ✅ Data extraction with regex patterns
 - ✅ Background processing endpoints
-- ⏳ Cross-validation engine (next step)
-- ⏳ Validation result generation
+- ✅ Cross-validation engine with normalization
+- ✅ Validation result generation (PASS/WARNING/FAIL)
+- ✅ Complete workflow orchestration
+- ⏳ Frontend implementation (next step)

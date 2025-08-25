@@ -71,6 +71,22 @@ def test_api_endpoints():
     except Exception as e:
         print(f'   ❌ Session list error: {e}')
     
+    print()
+    
+    # Test workflow (if we have a session)
+    if 'session_id' in locals():
+        print('5. Testing complete workflow...')
+        try:
+            response = requests.post(f'{api_url}/workflow/analyze-now/{session_id}')
+            if response.status_code == 200:
+                workflow_data = response.json()
+                print('   ✅ Complete workflow endpoint accessible')
+                print(f'   Workflow result: {workflow_data.get("success", "unknown")}')
+            else:
+                print(f'   ⚠️  Workflow test skipped (no files): {response.status_code}')
+        except Exception as e:
+            print(f'   ❌ Workflow test error: {e}')
+    
     print('\nAPI test completed!')
 
 

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.endpoints import sessions, files, processing
+from app.api.endpoints import sessions, files, processing, validation, workflow
 
 api_router = APIRouter()
 
@@ -20,4 +20,16 @@ api_router.include_router(
     processing.router,
     prefix='/processing',
     tags=['processing']
+)
+
+api_router.include_router(
+    validation.router,
+    prefix='/validation',
+    tags=['validation']
+)
+
+api_router.include_router(
+    workflow.router,
+    prefix='/workflow',
+    tags=['workflow']
 )
