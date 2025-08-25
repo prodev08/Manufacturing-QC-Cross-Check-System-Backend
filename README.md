@@ -10,12 +10,26 @@ python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-2. Install dependencies:
+2. Install system dependencies:
+```bash
+# Ubuntu/Debian
+sudo apt-get update
+sudo apt-get install tesseract-ocr tesseract-ocr-eng
+
+# Windows (install manually)
+# Download Tesseract from: https://github.com/UB-Mannheim/tesseract/wiki
+# Add to PATH or update config in ocr_service.py
+
+# macOS
+brew install tesseract
+```
+
+3. Install Python dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Set up PostgreSQL database:
+4. Set up PostgreSQL database:
 ```bash
 # Install PostgreSQL (Ubuntu/Debian)
 sudo apt-get install postgresql postgresql-contrib
@@ -28,19 +42,19 @@ sudo -u postgres createdb qc_system
 sudo -u postgres createuser -P user  # Set password when prompted
 ```
 
-4. Set up environment variables:
+5. Set up environment variables:
 ```bash
 cp .env.example .env
 # Edit .env with your PostgreSQL connection details:
 # DATABASE_URL=postgresql://user:password@localhost:5432/qc_system
 ```
 
-5. Initialize the database:
+6. Initialize the database:
 ```bash
 python init_db.py
 ```
 
-6. Run the development server:
+7. Run the development server:
 ```bash
 python -m uvicorn app.main:app --reload
 ```
@@ -85,6 +99,11 @@ app/
 - `GET /api/v1/files/{file_id}` - Get file details
 - `DELETE /api/v1/files/{file_id}` - Delete a file
 
+### Processing
+- `POST /api/v1/processing/process/{session_id}` - Start processing all files in a session
+- `GET /api/v1/processing/status/{session_id}` - Get processing status and summary
+- `POST /api/v1/processing/process-file/{file_id}` - Process a single file
+
 ### Supported File Types
 - **Traveler PDFs**: `application/pdf`
 - **Product Images**: `image/jpeg`, `image/png`
@@ -108,5 +127,8 @@ python test_api.py
 - ✅ File upload endpoints with validation
 - ✅ Session management API
 - ✅ File storage and management
-- ⏳ File processing pipeline (next step)
-- ⏳ Validation engine
+- ✅ File processing pipeline (PDF, OCR, Excel)
+- ✅ Data extraction with regex patterns
+- ✅ Background processing endpoints
+- ⏳ Cross-validation engine (next step)
+- ⏳ Validation result generation

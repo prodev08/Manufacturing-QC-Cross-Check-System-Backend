@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.endpoints import sessions, files
+from app.api.endpoints import sessions, files, processing
 
 api_router = APIRouter()
 
@@ -14,4 +14,10 @@ api_router.include_router(
     files.router,
     prefix='/files',
     tags=['files']
+)
+
+api_router.include_router(
+    processing.router,
+    prefix='/processing',
+    tags=['processing']
 )
