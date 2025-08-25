@@ -71,6 +71,32 @@ app/
 └── workers/             # Background job workers
 ```
 
+## API Endpoints
+
+### Sessions
+- `POST /api/v1/sessions/` - Create a new QC analysis session
+- `GET /api/v1/sessions/` - List all sessions with pagination
+- `GET /api/v1/sessions/{session_id}` - Get session details with files and results
+- `DELETE /api/v1/sessions/{session_id}` - Delete a session and all associated data
+
+### Files
+- `POST /api/v1/files/upload/{session_id}` - Upload multiple files to a session
+- `GET /api/v1/files/session/{session_id}` - Get all files for a session
+- `GET /api/v1/files/{file_id}` - Get file details
+- `DELETE /api/v1/files/{file_id}` - Delete a file
+
+### Supported File Types
+- **Traveler PDFs**: `application/pdf`
+- **Product Images**: `image/jpeg`, `image/png`
+- **BOM Excel**: `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`, `application/vnd.ms-excel`
+
+## Testing
+
+Test the API endpoints:
+```bash
+python test_api.py
+```
+
 ## Current Status
 
 - ✅ Basic FastAPI structure
@@ -79,6 +105,8 @@ app/
 - ✅ Database models (Session, UploadedFile, ValidationResult)
 - ✅ Pydantic schemas for API requests/responses
 - ✅ Alembic database migrations
-- ⏳ File upload endpoints (next step)
-- ⏳ File processing pipeline
+- ✅ File upload endpoints with validation
+- ✅ Session management API
+- ✅ File storage and management
+- ⏳ File processing pipeline (next step)
 - ⏳ Validation engine
