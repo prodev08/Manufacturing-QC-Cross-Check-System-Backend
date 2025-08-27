@@ -12,8 +12,8 @@ class Settings(BaseSettings):
     # Database
     database_url: str = 'postgresql://postgres:password@localhost:5432/qc_system'
     
-    # OpenAI API (main image processing)
-    openai_api_key: str = ""
+    # EasyOCR settings (no API key needed)
+    easyocr_gpu: bool = False
     
     # File Storage
     upload_dir: str = './uploads'

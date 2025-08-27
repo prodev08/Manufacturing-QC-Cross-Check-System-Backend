@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.models.file import UploadedFile, FileType, ProcessingStatus
 from app.services.pdf_extractor import PDFExtractor
-from app.services.openai_vision import OpenAIVisionService
+from app.services.easyocr_service import EasyOCRService
 from app.services.excel_parser import ExcelParser
 
 logger = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ class FileProcessor:
     def __init__(self):
         self.logger = logger
         self.pdf_extractor = PDFExtractor()
-        self.openai_vision = OpenAIVisionService()
+        self.easyocr_service = EasyOCRService()
         self.excel_parser = ExcelParser()
     
     async def process_file(self, file_record: UploadedFile, db: Session) -> Dict[str, Any]:
@@ -34,8 +34,8 @@ class FileProcessor:
             if file_record.file_type == FileType.TRAVELER_PDF:
                 result = self.pdf_extractor.extract_traveler_data(file_record.file_path)
             elif file_record.file_type == FileType.PRODUCT_IMAGE:
-                # Use OpenAI Vision for more accurate image analysis
-                result = await self.openai_vision.extract_product_image_data(file_record.file_path)
+                # Use EasyOCR for manufacturing text extraction
+                result = await self.easyocr_service.extract_product_image_data(file_record.file_path)
             elif file_record.file_type == FileType.BOM_EXCEL:
                 result = self.excel_parser.parse_bom_file(file_record.file_path)
             else:
@@ -166,7 +166,7 @@ class FileProcessor:
             if file_type == FileType.TRAVELER_PDF:
                 return self.pdf_extractor.validate_pdf(file_path)
             elif file_type == FileType.PRODUCT_IMAGE:
-                return self.openai_vision.validate_image(file_path)
+                return self.easyocr_service.validate_image(file_path)
             elif file_type == FileType.BOM_EXCEL:
                 return self.excel_parser.validate_excel_file(file_path)
             else:

@@ -19,7 +19,7 @@ PATTERNS = {
     'job_number': r'\b(\d{5})\b',
     
     # Work instruction: DRW-XXXX-YY
-    'work_instruction': r'DRW[-_](\d{4})[-_]([A-Z]\d?)',
+    'work_instruction': r'DRW[-_](\d{4})[-_](\d{2})',
     
     # Flight status
     'flight_status': r'\b(FLIGHT|EDU\s*[-–]?\s*NOT\s+FOR\s+FLIGHT)\b',
@@ -29,7 +29,10 @@ PATTERNS = {
     'revision_column': r'\b([A-Z]\d?)\b',  # For BOM column parsing
     
     # Part numbers (general)
-    'part_number': r'\b([A-Z]{2,4}[-_]\d{4}[-_][A-Z]\d?)\b'
+    'part_number': r'\b([A-Z]{2,4}[-_]\d{4}[-_][A-Z]\d?)\b',
+    
+    # Seq 20 pattern
+    'seq_20': r'(?:Seq\s*20|Sequence\s*20)(.*?)(?:Seq\s*\d+|$)'
 }
 
 
@@ -116,8 +119,7 @@ def extract_revisions(text: str) -> List[str]:
 def extract_seq_20_data(text: str) -> Dict[str, Any]:
     """Extract data from Seq 20 section of traveler documents"""
     # Look for Seq 20 section
-    seq_20_pattern = r'(?:Seq\s*20|Sequence\s*20)(.*?)(?:Seq\s*\d+|$)'
-    seq_20_match = re.search(seq_20_pattern, text, re.IGNORECASE | re.DOTALL)
+    seq_20_match = re.search(PATTERNS['seq_20'], text, re.IGNORECASE | re.DOTALL)
     
     if not seq_20_match:
         return {}
