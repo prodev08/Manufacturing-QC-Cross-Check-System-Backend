@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.models.file import UploadedFile, FileType, ProcessingStatus
 from app.services.pdf_extractor import PDFExtractor
-from app.services.ocr_service import OCRService
+from app.services.openai_vision import OpenAIVisionService
 from app.services.excel_parser import ExcelParser
 
 logger = logging.getLogger(__name__)
@@ -17,10 +17,10 @@ class FileProcessor:
     def __init__(self):
         self.logger = logger
         self.pdf_extractor = PDFExtractor()
-        self.ocr_service = OCRService()
+        self.openai_vision = OpenAIVisionService()
         self.excel_parser = ExcelParser()
     
-    def process_file(self, file_record: UploadedFile, db: Session) -> Dict[str, Any]:
+    async def process_file(self, file_record: UploadedFile, db: Session) -> Dict[str, Any]:
         """Process a single file based on its type"""
         try:
             self.logger.info(f'Starting processing for file: {file_record.filename} ({file_record.file_type})')
@@ -33,7 +33,8 @@ class FileProcessor:
             if file_record.file_type == FileType.TRAVELER_PDF:
                 result = self.pdf_extractor.extract_traveler_data(file_record.file_path)
             elif file_record.file_type == FileType.PRODUCT_IMAGE:
-                result = self.ocr_service.extract_product_image_data(file_record.file_path)
+                # Use OpenAI Vision for more accurate image analysis
+                result = await self.openai_vision.extract_product_image_data(file_record.file_path)
             elif file_record.file_type == FileType.BOM_EXCEL:
                 result = self.excel_parser.parse_bom_file(file_record.file_path)
             else:
@@ -71,7 +72,7 @@ class FileProcessor:
                 'error': str(e)
             }
     
-    def process_session_files(self, session_id: str, db: Session) -> Dict[str, Any]:
+    async def process_session_files(self, session_id: str, db: Session) -> Dict[str, Any]:
         """Process all files in a session"""
         try:
             # Get all pending files for the session
@@ -92,7 +93,7 @@ class FileProcessor:
             failed_count = 0
             
             for file_record in files:
-                result = self.process_file(file_record, db)
+                result = await self.process_file(file_record, db)
                 results.append({
                     'file_id': str(file_record.id),
                     'filename': file_record.filename,
@@ -134,7 +135,7 @@ class FileProcessor:
             if file_type == FileType.TRAVELER_PDF:
                 return self.pdf_extractor.validate_pdf(file_path)
             elif file_type == FileType.PRODUCT_IMAGE:
-                return self.ocr_service.validate_image(file_path)
+                return self.openai_vision.validate_image(file_path)
             elif file_type == FileType.BOM_EXCEL:
                 return self.excel_parser.validate_excel_file(file_path)
             else:

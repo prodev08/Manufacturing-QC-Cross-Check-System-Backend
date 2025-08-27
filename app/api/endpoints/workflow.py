@@ -2,8 +2,9 @@ from typing import Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
 from uuid import UUID
+import logging
 
-from app.database import get_db
+from app.database import SessionLocal, get_db
 from app.models.session import Session as SessionModel
 from app.services.workflow import QCWorkflow
 
@@ -64,7 +65,7 @@ async def run_complete_analysis_now(
             )
         
         # Run analysis
-        result = workflow.run_complete_analysis(session_id, db)
+        result = await workflow.run_complete_analysis(session_id, db)
         
         if not result['success']:
             raise HTTPException(
@@ -145,14 +146,11 @@ async def retry_failed_processing(
 
 async def run_analysis_background(session_id: UUID):
     """Background task to run complete analysis"""
-    from app.database import SessionLocal
-    
     db = SessionLocal()
     try:
-        workflow.run_complete_analysis(session_id, db)
+        await workflow.run_complete_analysis(session_id, db)
     except Exception as e:
         # Log error but don't raise - this is a background task
-        import logging
         logger = logging.getLogger(__name__)
         logger.error(f'Background analysis failed for session {session_id}: {str(e)}')
     finally:

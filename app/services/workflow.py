@@ -18,7 +18,7 @@ class QCWorkflow:
         self.file_processor = FileProcessor()
         self.validator = QCValidator()
     
-    def run_complete_analysis(self, session_id: UUID, db: Session) -> Dict[str, Any]:
+    async def run_complete_analysis(self, session_id: UUID, db: Session) -> Dict[str, Any]:
         """Run the complete QC analysis workflow: process files then validate"""
         try:
             self.logger.info(f'Starting complete QC analysis for session: {session_id}')
@@ -34,7 +34,7 @@ class QCWorkflow:
             
             # Step 1: Process all files
             self.logger.info(f'Step 1: Processing files for session {session_id}')
-            processing_result = self.file_processor.process_session_files(str(session_id), db)
+            processing_result = await self.file_processor.process_session_files(str(session_id), db)
             
             if not processing_result['success']:
                 session.status = SessionStatus.FAILED
@@ -112,9 +112,18 @@ class QCWorkflow:
             processing_summary = self.file_processor.get_processing_summary(str(session_id), db)
             
             # Get validation summary if available
-            from app.api.endpoints.validation import get_validation_summary
             try:
-                validation_summary = get_validation_summary(session_id, db)
+                validator = QCValidator()
+                validation_results = validator.get_validation_results(str(session_id), db)
+                if validation_results:
+                    validation_summary = {
+                        'total_checks': len(validation_results),
+                        'passed': len([r for r in validation_results if r.status.value == 'PASS']),
+                        'warnings': len([r for r in validation_results if r.status.value == 'WARNING']),
+                        'failures': len([r for r in validation_results if r.status.value == 'FAIL'])
+                    }
+                else:
+                    validation_summary = None
             except:
                 validation_summary = None
             

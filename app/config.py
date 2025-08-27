@@ -10,10 +10,10 @@ class Settings(BaseSettings):
     debug: bool = True
     
     # Database
-    database_url: str = 'postgresql://user:password@localhost:5432/qc_system'
+    database_url: str = 'postgresql://postgres:password@localhost:5432/qc_system'
     
-    # Redis
-    redis_url: str = 'redis://localhost:6379/0'
+    # OpenAI API (main image processing)
+    openai_api_key: str = ""
     
     # File Storage
     upload_dir: str = './uploads'

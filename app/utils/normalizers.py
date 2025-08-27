@@ -169,11 +169,18 @@ def extract_data_by_file_type(file_data: Dict[str, Any]) -> Dict[str, List[str]]
         })
     
     elif file_type == 'PRODUCT_IMAGE':
+        # Handle flight_status which might be a list or string
+        flight_status_raw = file_data.get('flight_status')
+        if isinstance(flight_status_raw, list):
+            flight_status = flight_status_raw[0] if flight_status_raw else None
+        else:
+            flight_status = flight_status_raw
+            
         result.update({
             'board_serials': file_data.get('board_serials', []),
             'unit_serials': file_data.get('unit_serials', []),
-            'part_numbers': file_data.get('board_part_numbers', []),
-            'flight_status': file_data.get('flight_status')
+            'part_numbers': file_data.get('part_numbers', []),
+            'flight_status': flight_status
         })
     
     elif file_type == 'BOM_EXCEL':

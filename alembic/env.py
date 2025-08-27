@@ -9,9 +9,8 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 # Import your models
-from app.database import Base
-from app.models import Session, UploadedFile, ValidationResult
 from app.config import settings
+from app.database import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

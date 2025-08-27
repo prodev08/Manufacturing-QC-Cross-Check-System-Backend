@@ -3,6 +3,8 @@ from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
 
+from app.schemas.file import FileResponse
+from app.schemas.validation import ValidationResultResponse
 from app.models.session import SessionStatus, OverallResult
 
 
@@ -38,10 +40,5 @@ class SessionListResponse(BaseModel):
     total: int
     page: int
     per_page: int
-
-
-# Import here to avoid circular imports
-from .file import FileResponse
-from .validation import ValidationResultResponse
 
 SessionWithFiles.model_rebuild()

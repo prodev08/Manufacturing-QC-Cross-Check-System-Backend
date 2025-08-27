@@ -395,7 +395,13 @@ class QCValidator:
         flight_status = image_data.get('flight_status')
         
         if flight_status:
-            normalized_status = normalize_flight_status(flight_status)
+            # Handle both string and list formats
+            if isinstance(flight_status, list):
+                flight_status_str = flight_status[0] if flight_status else ''
+            else:
+                flight_status_str = flight_status
+            
+            normalized_status = normalize_flight_status(flight_status_str)
             results.append({
                 'session_id': session_id,
                 'check_type': CheckType.FLIGHT_STATUS,

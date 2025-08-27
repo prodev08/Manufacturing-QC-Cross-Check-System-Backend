@@ -7,6 +7,7 @@ from app.database import get_db
 from app.models.session import Session as SessionModel, SessionStatus
 from app.models.file import UploadedFile
 from app.services.file_processor import FileProcessor
+from app.database import SessionLocal
 
 router = APIRouter()
 file_processor = FileProcessor()
@@ -133,12 +134,10 @@ async def process_single_file(
 
 async def process_files_background(session_id: str):
     """Background task to process all files in a session"""
-    from app.database import SessionLocal
-    
     db = SessionLocal()
     try:
         # Process all files
-        result = file_processor.process_session_files(session_id, db)
+        result = await file_processor.process_session_files(session_id, db)
         
         # Update session status based on results
         session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
