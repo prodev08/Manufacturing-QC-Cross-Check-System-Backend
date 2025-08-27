@@ -3,7 +3,7 @@ import logging
 from typing import Dict, Any, Optional
 from pathlib import Path
 from PIL import Image
-from openai import OpenAI
+from openai import AsyncOpenAI
 import re
 import json
 
@@ -24,7 +24,7 @@ class OpenAIVisionService:
             self.client = None
         else:
             try:
-                self.client = OpenAI(api_key=settings.openai_api_key)
+                self.client = AsyncOpenAI(api_key=settings.openai_api_key)
                 self.logger.info("OpenAI Vision service initialized successfully")
             except Exception as e:
                 self.logger.error(f"Failed to initialize OpenAI client: {e}")

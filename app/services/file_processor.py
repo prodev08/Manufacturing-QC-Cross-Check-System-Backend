@@ -1,5 +1,6 @@
 import logging
-from typing import Dict, Any, Optional
+import asyncio
+from typing import Dict, Any, Optional, List
 from pathlib import Path
 from sqlalchemy.orm import Session
 
@@ -73,7 +74,7 @@ class FileProcessor:
             }
     
     async def process_session_files(self, session_id: str, db: Session) -> Dict[str, Any]:
-        """Process all files in a session"""
+        """Process all files in a session concurrently"""
         try:
             # Get all pending files for the session
             files = db.query(UploadedFile).filter(
@@ -88,24 +89,54 @@ class FileProcessor:
                     'processed_count': 0
                 }
             
+            self.logger.info(f'Processing {len(files)} files concurrently for session {session_id}')
+            
+            # Process files concurrently with a limit to avoid overwhelming the system
+            semaphore = asyncio.Semaphore(3)  # Limit to 3 concurrent file processes
+            
+            async def process_file_with_semaphore(file_record: UploadedFile):
+                async with semaphore:
+                    # Refresh the file record to avoid stale state in concurrent processing
+                    db.refresh(file_record)
+                    return await self.process_file(file_record, db), file_record
+            
+            # Create tasks for all files
+            tasks = [process_file_with_semaphore(file_record) for file_record in files]
+            
+            # Execute all tasks concurrently
+            results_with_files = await asyncio.gather(*tasks, return_exceptions=True)
+            
             results = []
             successful_count = 0
             failed_count = 0
             
-            for file_record in files:
-                result = await self.process_file(file_record, db)
-                results.append({
-                    'file_id': str(file_record.id),
-                    'filename': file_record.filename,
-                    'file_type': file_record.file_type,
-                    'success': result['success'],
-                    'error': result.get('error')
-                })
-                
-                if result['success']:
-                    successful_count += 1
-                else:
+            for result_data in results_with_files:
+                if isinstance(result_data, Exception):
+                    self.logger.error(f'File processing task failed: {str(result_data)}')
                     failed_count += 1
+                    results.append({
+                        'file_id': 'unknown',
+                        'filename': 'unknown',
+                        'file_type': 'unknown',
+                        'success': False,
+                        'error': str(result_data)
+                    })
+                else:
+                    result, file_record = result_data
+                    results.append({
+                        'file_id': str(file_record.id),
+                        'filename': file_record.filename,
+                        'file_type': file_record.file_type.value if file_record.file_type else 'unknown',
+                        'success': result['success'],
+                        'error': result.get('error')
+                    })
+                    
+                    if result['success']:
+                        successful_count += 1
+                    else:
+                        failed_count += 1
+            
+            self.logger.info(f'Concurrent processing completed for session {session_id}: {successful_count} successful, {failed_count} failed')
             
             return {
                 'success': True,
