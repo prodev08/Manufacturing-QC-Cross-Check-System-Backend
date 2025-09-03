@@ -24,4 +24,5 @@ def get_db():
 
 def create_tables():
     """Create all tables in the database"""
+    from app.models import Session, UploadedFile, ValidationResult
     Base.metadata.create_all(bind=engine)
